@@ -1,0 +1,145 @@
+    body { font-family: Arial, sans-serif; margin:0; padding:0; font-size: 200%; }
+
+    /* ▼▼▼ メニュー画面（スマホでシンプル） ▼▼▼ */
+    #menu-screen{
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      box-sizing:border-box;
+      background:#fff;
+    }
+    .menu-wrap{
+      width:min(520px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    .menu-title{
+      font-size:1.2em;
+      font-weight:800;
+      line-height:1.2;
+    }
+    .menu-btn{
+      width:100%;
+      padding:14px 14px;
+      font-size:1em;
+      border-radius:10px;
+      border:1px solid #ccc;
+      background:#111;
+      color:#fff;
+      cursor:pointer;
+    }
+    .menu-btn.secondary{
+      background:#fff;
+      color:#111;
+    }
+    .menu-btn:disabled{
+      opacity:0.55;
+      cursor:not-allowed;
+    }
+    .menu-note{
+      font-size:0.8em;
+      color:#666;
+    }
+    /* ▲▲▲ メニュー画面 ▲▲▲ */
+
+    #container { display:flex; flex-direction:column; height:100vh; }
+    #menu { padding:8px; background:#f7f7f7; }
+    #menu-row { display:flex; flex-wrap:wrap; align-items:flex-start; gap:12px; margin-bottom:8px; font-size: 80%; }
+    label { font-weight:bold; display:block; margin-bottom:4px; }
+    select, button, input[type="checkbox"] { font-size: 1em; padding:6px 12px; border-radius:4px; cursor:pointer; }
+
+    #problem-list { display:none; margin-top:8px; flex-wrap:wrap; gap:4px; max-height:200px; overflow-y:auto; width:80%; }
+    #problem-list button { font-size:0.6em; text-align:center; padding:4px 6px; border-radius:4px; white-space:normal; height:2.4em; }
+
+    #app { flex:1; padding:12px; overflow-y:auto; background:#fff; width:80%; }
+
+    .problem { padding:10px; margin-bottom:12px; border-radius:6px; border:1px solid #ccc; font-size:1em; width:100%; box-sizing:border-box; }
+    .choice { margin-bottom:12px; padding:5px; border-radius:4px; }
+
+    .choice-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .choice-text { margin-bottom:6px; font-size:1em; flex:1; }
+
+    .choice-side { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+    .hist-badge {
+      font-size:0.85em;
+      padding:2px 8px;
+      border-radius:6px;
+      background:#eee;
+      white-space:nowrap;
+    }
+
+    .btn { margin-right:12px; padding:8px 16px; font-size:1em; border-radius:4px; cursor:pointer; }
+    .star-btn { padding:8px 12px; font-size:1em; border-radius:4px; cursor:pointer; }
+
+    /* ★次へ＋メニュー（同一行） */
+    .nav-row{
+      display:flex;
+      justify-content:space-between; /* 左：次へ 右：メニュー */
+      align-items:center;
+      gap:12px;
+      width:100%;
+      margin-top:12px;
+    }
+    .next-btn {
+      padding:10px 20px;
+      font-size:1em;
+      cursor:pointer;
+      border-radius:4px;
+    }
+    .menu-back-btn{
+      padding:10px 20px;
+      font-size:1em;
+      cursor:pointer;
+      border-radius:4px;
+    }
+
+    /* ▼▼▼ 解説UI（本文＝太字、根拠=*～*＝灰色枠で非太字） ▼▼▼ */
+    .explanation{
+      display:block;
+      padding:8px 10px;
+      border-radius:6px;
+      margin-top:6px;
+      line-height:1.4;
+      margin-left:12px;
+    }
+    .ex-title{
+      display:inline;
+      font-weight:bold;
+      margin:0;
+      padding:0;
+    }
+    .ex-main{
+      display:inline;
+      font-weight:bold;
+      margin:0;
+      padding:0;
+      white-space:normal;
+      word-break:break-word;
+    }
+    .ex-ref{
+      font-weight:normal;
+      background:#e6e6e6;
+      border:1px solid #cfcfcf;
+      border-radius:6px;
+      padding:6px 8px;
+      margin-top:8px;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    /* ▲▲▲ 解説UI ▲▲▲ */
+
+    .explanation-add { font-style:italic; font-size:1em; margin:6px 0; padding:4px 6px; background:#d9d9d9; border-radius:4px; }
+
+    .fav-wrong-block { display:flex; flex-direction:column; gap:10px; }
+    .inline-check { display:flex; align-items:center; gap:8px; }
+    .small-label { font-weight:bold; margin:0; padding:0; }
+
+    /* 既存の width:80% をスマホで100%に */
+    @media (max-width: 600px){
+      #app{ width:100% !important; }
+      #problem-list{ width:100% !important; }
+    }
+  
