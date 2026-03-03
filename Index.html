@@ -1,0 +1,989 @@
+<!-- ===== Index.html ===== -->
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; padding:0; font-size: 200%; }
+
+    /* ▼▼▼ メニュー画面（スマホでシンプル） ▼▼▼ */
+    #menu-screen{
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      box-sizing:border-box;
+      background:#fff;
+    }
+    .menu-wrap{
+      width:min(520px, 100%);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    .menu-title{
+      font-size:1.2em;
+      font-weight:800;
+      line-height:1.2;
+    }
+    .menu-btn{
+      width:100%;
+      padding:14px 14px;
+      font-size:1em;
+      border-radius:10px;
+      border:1px solid #ccc;
+      background:#111;
+      color:#fff;
+      cursor:pointer;
+    }
+    .menu-btn.secondary{
+      background:#fff;
+      color:#111;
+    }
+    .menu-btn:disabled{
+      opacity:0.55;
+      cursor:not-allowed;
+    }
+    .menu-note{
+      font-size:0.8em;
+      color:#666;
+    }
+    /* ▲▲▲ メニュー画面 ▲▲▲ */
+
+    #container { display:flex; flex-direction:column; height:100vh; }
+    #menu { padding:8px; background:#f7f7f7; }
+    #menu-row { display:flex; flex-wrap:wrap; align-items:flex-start; gap:12px; margin-bottom:8px; font-size: 80%; }
+    label { font-weight:bold; display:block; margin-bottom:4px; }
+    select, button, input[type="checkbox"] { font-size: 1em; padding:6px 12px; border-radius:4px; cursor:pointer; }
+
+    #problem-list { display:none; margin-top:8px; flex-wrap:wrap; gap:4px; max-height:200px; overflow-y:auto; width:80%; }
+    #problem-list button { font-size:0.6em; text-align:center; padding:4px 6px; border-radius:4px; white-space:normal; height:2.4em; }
+
+    #app { flex:1; padding:12px; overflow-y:auto; background:#fff; width:80%; }
+
+    .problem { padding:10px; margin-bottom:12px; border-radius:6px; border:1px solid #ccc; font-size:1em; width:100%; box-sizing:border-box; }
+    .choice { margin-bottom:12px; padding:5px; border-radius:4px; }
+
+    .choice-head { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .choice-text { margin-bottom:6px; font-size:1em; flex:1; }
+
+    .choice-side { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+    .hist-badge {
+      font-size:0.85em;
+      padding:2px 8px;
+      border-radius:6px;
+      background:#eee;
+      white-space:nowrap;
+    }
+
+    .btn { margin-right:12px; padding:8px 16px; font-size:1em; border-radius:4px; cursor:pointer; }
+    .star-btn { padding:8px 12px; font-size:1em; border-radius:4px; cursor:pointer; }
+
+    /* ★次へ＋メニュー（同一行） */
+    .nav-row{
+      display:flex;
+      justify-content:space-between; /* 左：次へ 右：メニュー */
+      align-items:center;
+      gap:12px;
+      width:100%;
+      margin-top:12px;
+    }
+    .next-btn {
+      padding:10px 20px;
+      font-size:1em;
+      cursor:pointer;
+      border-radius:4px;
+    }
+    .menu-back-btn{
+      padding:10px 20px;
+      font-size:1em;
+      cursor:pointer;
+      border-radius:4px;
+    }
+
+    /* ▼▼▼ 解説UI（本文＝太字、根拠=*～*＝灰色枠で非太字） ▼▼▼ */
+    .explanation{
+      display:block;
+      padding:8px 10px;
+      border-radius:6px;
+      margin-top:6px;
+      line-height:1.4;
+      margin-left:12px;
+    }
+    .ex-title{
+      display:inline;
+      font-weight:bold;
+      margin:0;
+      padding:0;
+    }
+    .ex-main{
+      display:inline;
+      font-weight:bold;
+      margin:0;
+      padding:0;
+      white-space:normal;
+      word-break:break-word;
+    }
+    .ex-ref{
+      font-weight:normal;
+      background:#e6e6e6;
+      border:1px solid #cfcfcf;
+      border-radius:6px;
+      padding:6px 8px;
+      margin-top:8px;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    /* ▲▲▲ 解説UI ▲▲▲ */
+
+    .explanation-add { font-style:italic; font-size:1em; margin:6px 0; padding:4px 6px; background:#d9d9d9; border-radius:4px; }
+
+    .fav-wrong-block { display:flex; flex-direction:column; gap:10px; }
+    .inline-check { display:flex; align-items:center; gap:8px; }
+    .small-label { font-weight:bold; margin:0; padding:0; }
+
+    /* 既存の width:80% をスマホで100%に */
+    @media (max-width: 600px){
+      #app{ width:100% !important; }
+      #problem-list{ width:100% !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ▼ 前提：メニュー画面 ▼ -->
+  <div id="menu-screen">
+    <div class="menu-wrap">
+      <div class="menu-title">司法書士肢別演習アプリ</div>
+
+      <button id="start-exercise-btn" class="menu-btn" onclick="enterExercise()" disabled>
+        肢別演習
+      </button>
+
+      <button id="stats-btn" class="menu-btn secondary" onclick="openStats()" disabled>
+        正答状況
+      </button>
+
+      <button id="search-btn" class="menu-btn secondary" onclick="openWordSearch()" disabled>
+        ワード検索
+      </button>
+
+      <div id="menu-loading" class="menu-note">データ読み込み中…</div>
+    </div>
+  </div>
+
+  <!-- ▼ 既存：問題画面（最初は非表示） ▼ -->
+  <div id="exercise-screen" style="display:none;">
+    <div id="container">
+      <div id="menu">
+        <div id="menu-row">
+          <div>
+            <label>表示モード</label>
+            <select id="mode-select" onchange="changeMode()">
+              <option value="choice_rand" selected>肢別ランダム</option>
+              <option value="set_seq">セット番号順</option>
+              <option value="set_rand">セットランダム</option>
+            </select>
+          </div>
+
+          <div>
+            <label>年度</label>
+            <select id="year-select" onchange="onFilterChange()"></select>
+          </div>
+
+          <div>
+            <label>区分</label>
+            <select id="examtime-select" onchange="onFilterChange()"></select>
+          </div>
+
+          <div>
+            <label>科目</label>
+            <select id="subject-select" onchange="onFilterChange()"></select>
+          </div>
+
+          <div>
+            <label>復習</label>
+            <select id="review-filter" onchange="onFilterChange()">
+              <option value="all" selected>全て</option>
+              <option value="c0">○0</option>
+              <option value="c1">○1</option>
+              <option value="c2">○2</option>
+              <option value="c3">○3</option>
+              <option value="c4">○4</option>
+              <option value="c5">○5</option>
+            </select>
+          </div>
+
+          <div class="fav-wrong-block">
+            <div class="inline-check">
+              <input id="fav-only" type="checkbox" onchange="onFilterChange()">
+              <span class="small-label">★のみ</span>
+            </div>
+
+            <div>
+              <button id="wrong-review-btn" onclick="toggleWrongReview()">×復習</button>
+            </div>
+          </div>
+
+          <div style="padding-top:18px;">
+            <button id="toggle-problem-list-btn" onclick="toggleProblemList()">項目表示</button>
+          </div>
+        </div>
+
+        <div id="problem-list"></div>
+      </div>
+
+      <div id="app"></div>
+    </div>
+  </div>
+
+  <script>
+    const KEY_HIST = "ss_hist_v1";
+    const KEY_FAV  = "ss_fav_v1";
+
+    const ALL_LABEL = "全て";
+    const HIST_MAX = 5;
+
+    // 常に最後に置きたい2科目
+    const REG_SUBJECTS = ["不動産登記法", "商業登記法"];
+    const REG_SET = new Set(REG_SUBJECTS);
+
+    // PMで表示させたい科目（= 追加要件）
+    const PM_SUBJECTS = new Set([
+      "民事訴訟法",
+      "民事保全法",
+      "民事執行法",
+      "司法書士法",
+      "供託法",
+      "不動産登記法",
+      "商業登記法",
+    ]);
+
+    const subjectOrderBase = [
+      "民法",
+      "商法・会社法",
+      "憲法",
+      "刑法",
+      "民事訴訟法",
+      "民事保全法",
+      "民事執行法",
+      "司法書士法",
+      "供託法",
+    ];
+    const subjectOrder = [...subjectOrderBase, ...REG_SUBJECTS];
+
+    let problems = [], choices = [];
+    let problemMap = new Map();
+
+    let displayMode = "choice";
+    let setOrder = "rand";
+
+    let currentProblemIndex = 0, orderedProblems = [], remainingChoices = [];
+
+    let selectedYear = ALL_LABEL, selectedExamTime = ALL_LABEL, selectedSubject = ALL_LABEL;
+
+    let favOnly = false;
+    let reviewFilter = "all";
+
+    let wrongThisSession = new Set();
+    let wrongReviewMode = false;
+
+    let histStore = {};
+    let favStore  = {};
+
+    let isSyncing = false;
+
+    // ★項目表示は手動トグルのみ（setモードでも自動で開かない）
+    let problemListVisible = false;
+
+    // ★肢別演習を開始したか
+    let hasEnteredExercise = false;
+
+    google.script.run.withSuccessHandler(initApp).getProblemsAndChoices();
+
+    function enterExercise(){
+      hasEnteredExercise = true;
+      document.getElementById("menu-screen").style.display = "none";
+      document.getElementById("exercise-screen").style.display = "block";
+      setProblemList();
+    }
+
+    function backToMenu(){
+      hasEnteredExercise = false;
+      document.getElementById("exercise-screen").style.display = "none";
+      document.getElementById("menu-screen").style.display = "flex";
+    }
+
+    // ★メニュー追加ボタン（未実装の仮動作）
+    function openStats(){
+      alert("正答状況：準備中");
+    }
+    function openWordSearch(){
+      alert("ワード検索：準備中");
+    }
+
+    function loadJSON(key, fallback){
+      try {
+        const raw = localStorage.getItem(key);
+        if(!raw) return fallback;
+        const obj = JSON.parse(raw);
+        return (obj && typeof obj === "object") ? obj : fallback;
+      } catch(e){
+        return fallback;
+      }
+    }
+    function saveJSON(key, obj){
+      localStorage.setItem(key, JSON.stringify(obj));
+    }
+
+    function normalizeText(v){ return String(v ?? "").trim(); }
+
+    function getHist(choiceId){
+      const h = histStore[String(choiceId)];
+      return Array.isArray(h) ? h.slice(0, HIST_MAX) : [];
+    }
+    function pushHist(choiceId, isCorrect){
+      const id = String(choiceId);
+      const arr = getHist(id);
+      arr.push(isCorrect ? 1 : 0);
+      while(arr.length > HIST_MAX) arr.shift();
+      histStore[id] = arr;
+      saveJSON(KEY_HIST, histStore);
+      return arr;
+    }
+
+    function isFav(choiceId){ return !!favStore[String(choiceId)]; }
+    function toggleFav(choiceId){
+      const id = String(choiceId);
+      if(favStore[id]) delete favStore[id];
+      else favStore[id] = true;
+      saveJSON(KEY_FAV, favStore);
+      return !!favStore[id];
+    }
+
+    function formatHistSymbols(choiceId){
+      const h = getHist(choiceId);
+      const symbols = h.map(v => v === 1 ? "○" : "×");
+      while(symbols.length < HIST_MAX) symbols.unshift("-");
+      return symbols.join("");
+    }
+
+    function getCorrectCountN(choiceId){
+      const h = getHist(choiceId);
+      if(h.length === 0) return null;
+      return h.reduce((sum, v)=>sum + (v === 1 ? 1 : 0), 0);
+    }
+
+    function escapeHTML(s){
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatExplanationHTML(text){
+      if(!text) return { mainHTML: "", refHTMLs: [] };
+
+      const src = String(text).replace(/[\r\n\t]+/g, " ");
+
+      const refs = [];
+      let main = "";
+      let lastIndex = 0;
+
+      const re = /\*([^*]+)\*/g;
+      let m;
+      while((m = re.exec(src)) !== null){
+        main += src.slice(lastIndex, m.index);
+        refs.push(m[1]);
+        lastIndex = re.lastIndex;
+      }
+      main += src.slice(lastIndex);
+
+      main = main.replace(/[ \u3000]+/g, " ").trim();
+
+      const mainHTML = escapeHTML(main);
+      const refHTMLs = refs
+        .map(r => String(r).trim())
+        .filter(r => r !== "")
+        .map(r => escapeHTML(r));
+
+      return { mainHTML, refHTMLs };
+    }
+
+    function initApp(data){
+      problems = data.problems.map(p => ({
+        ...p,
+        year: normalizeText(p.year),
+        exam_time: normalizeText(p.exam_time),
+        subject: normalizeText(p.subject),
+      }));
+      choices  = data.choices.map(c => ({ ...c, label: normalizeText(c.label) }));
+
+      problemMap = new Map(problems.map(p => [p.problem_id, p]));
+
+      histStore = loadJSON(KEY_HIST, {});
+      favStore  = loadJSON(KEY_FAV, {});
+
+      selectedYear = selectedExamTime = selectedSubject = ALL_LABEL;
+      favOnly = false;
+      reviewFilter = "all";
+      wrongReviewMode = false;
+      wrongThisSession = new Set();
+
+      problemListVisible = false;
+
+      applyModeFromUI();
+      syncFilterOptions();
+      setModeUI();
+
+      if(hasEnteredExercise){
+        setProblemList();
+      }
+
+      // ★メニューのボタンを有効化
+      const startBtn = document.getElementById("start-exercise-btn");
+      const statsBtn = document.getElementById("stats-btn");
+      const searchBtn = document.getElementById("search-btn");
+      const loading = document.getElementById("menu-loading");
+
+      if(startBtn) startBtn.disabled = false;
+      if(statsBtn) statsBtn.disabled = false;
+      if(searchBtn) searchBtn.disabled = false;
+      if(loading) loading.innerText = "";
+    }
+
+    function addOption(selectEl, value, text){
+      const o = document.createElement("option");
+      o.value = value;
+      o.innerText = text;
+      selectEl.appendChild(o);
+    }
+
+    function parseEra(label){
+      const s = normalizeText(label);
+      const m = s.match(/^([RH])\s*(\d+)$/i);
+      if(!m) return null;
+      return { era: m[1].toUpperCase(), n: parseInt(m[2], 10) };
+    }
+    function compareYearLabel(a, b){
+      const pa = parseEra(a);
+      const pb = parseEra(b);
+      if(!pa && !pb) return String(a).localeCompare(String(b));
+      if(!pa) return 1;
+      if(!pb) return -1;
+      if(pa.era !== pb.era) return pa.era === "R" ? -1 : 1;
+      return pb.n - pa.n;
+    }
+
+    function applyModeFromUI(){
+      const v = document.getElementById("mode-select").value;
+      if(v === "choice_rand"){ displayMode = "choice"; setOrder = "rand"; }
+      else if(v === "set_seq"){ displayMode = "set"; setOrder = "seq"; }
+      else if(v === "set_rand"){ displayMode = "set"; setOrder = "rand"; }
+      else { displayMode = "choice"; setOrder = "rand"; }
+    }
+
+    function changeMode(){
+      const prevMode = displayMode;
+      applyModeFromUI();
+
+      if(displayMode === "set" && prevMode !== "set"){
+        problemListVisible = false;
+        const div = document.getElementById("problem-list");
+        div.style.display = "none";
+      }
+
+      setModeUI();
+      setProblemList();
+    }
+
+    function setModeUI(){
+      const toggleBtn = document.getElementById("toggle-problem-list-btn");
+      const problemListDiv = document.getElementById("problem-list");
+
+      if(displayMode === "choice"){
+        toggleBtn.style.display = "none";
+        problemListVisible = false;
+        problemListDiv.style.display = "none";
+      } else {
+        toggleBtn.style.display = "inline-block";
+        problemListDiv.style.display = problemListVisible ? "flex" : "none";
+      }
+    }
+
+    function toggleProblemList(){
+      if(displayMode !== "set") return;
+      problemListVisible = !problemListVisible;
+      const div = document.getElementById("problem-list");
+      div.style.display = problemListVisible ? "flex" : "none";
+    }
+
+    function filterProblemsForOptions({year, exam, subject}){
+      return problems.filter(p => {
+        const okYear = (year === ALL_LABEL) || (p.year === year);
+        const okExam = (exam === ALL_LABEL) || (p.exam_time === exam);
+        const okSubj = (subject === ALL_LABEL) || (p.subject === subject);
+        return okYear && okExam && okSubj;
+      });
+    }
+
+    function buildYearSelect(availableYears, keepValue){
+      const el = document.getElementById("year-select");
+      el.innerHTML = "";
+      addOption(el, ALL_LABEL, ALL_LABEL);
+
+      const yearsSorted = [...new Set(availableYears)]
+        .filter(v => normalizeText(v) !== "")
+        .sort(compareYearLabel);
+
+      yearsSorted.forEach(y => addOption(el, y, y));
+
+      const next = yearsSorted.includes(keepValue) ? keepValue : ALL_LABEL;
+      el.value = next;
+      selectedYear = next;
+    }
+
+    function buildExamSelect(availableExams, keepValue){
+      const el = document.getElementById("examtime-select");
+      el.innerHTML = "";
+      addOption(el, ALL_LABEL, ALL_LABEL);
+
+      const examsSorted = [...new Set(availableExams)]
+        .filter(v => normalizeText(v) !== "")
+        .sort((a,b)=>String(a).localeCompare(String(b)));
+
+      examsSorted.forEach(t => addOption(el, t, t));
+
+      const next = examsSorted.includes(keepValue) ? keepValue : ALL_LABEL;
+      el.value = next;
+      selectedExamTime = next;
+    }
+
+    function applyExamTimeSubjectPolicy(list){
+      if(selectedExamTime === "PM"){
+        return list.filter(s => PM_SUBJECTS.has(s));
+      }
+      if(selectedExamTime === "AM"){
+        return list.filter(s => !REG_SET.has(s));
+      }
+      return list;
+    }
+
+    function orderSubjectsWithRegsLast(subjectSet){
+      const set = new Set(subjectSet);
+
+      const orderedMain = subjectOrderBase.filter(s => set.has(s));
+      const othersNonReg = [...set]
+        .filter(s => !subjectOrderBase.includes(s) && !REG_SET.has(s))
+        .sort((a,b)=>String(a).localeCompare(String(b)));
+
+      const regs = REG_SUBJECTS.filter(s => set.has(s));
+
+      return [...orderedMain, ...othersNonReg, ...regs];
+    }
+
+    function buildSubjectSelect(availableSubjects, keepValue){
+      const el = document.getElementById("subject-select");
+      el.innerHTML = "";
+      addOption(el, ALL_LABEL, ALL_LABEL);
+
+      const rawSet = new Set(availableSubjects.filter(v => normalizeText(v) !== ""));
+
+      let list = orderSubjectsWithRegsLast(rawSet);
+      list = applyExamTimeSubjectPolicy(list);
+
+      list.forEach(s => addOption(el, s, s));
+
+      const next = list.includes(keepValue) ? keepValue : ALL_LABEL;
+      el.value = next;
+      selectedSubject = next;
+    }
+
+    function syncFilterOptions(){
+      if(isSyncing) return;
+      isSyncing = true;
+
+      const prevYear = selectedYear;
+      const prevExam = selectedExamTime;
+      const prevSubj = selectedSubject;
+
+      const yearsCandidate = [...new Set(
+        problems
+          .filter(p => {
+            const okExam = (prevExam === ALL_LABEL) || (p.exam_time === prevExam);
+            const okSubj = (prevSubj === ALL_LABEL) || (p.subject === prevSubj);
+            return okExam && okSubj;
+          })
+          .map(p => p.year)
+      )].filter(y => normalizeText(y) !== "");
+
+      const yearsFiltered = yearsCandidate.filter(y =>
+        hasAnyRenderableChoice({ year: y, exam: prevExam, subject: prevSubj })
+      );
+
+      buildYearSelect(yearsFiltered, prevYear);
+
+      const forExam = filterProblemsForOptions({year: selectedYear, exam: ALL_LABEL, subject: prevSubj});
+      buildExamSelect(forExam.map(p => p.exam_time), prevExam);
+
+      const forSubj = filterProblemsForOptions({year: selectedYear, exam: selectedExamTime, subject: ALL_LABEL});
+      buildSubjectSelect(forSubj.map(p => p.subject), prevSubj);
+
+      isSyncing = false;
+    }
+
+    function onFilterChange(){
+      selectedYear = document.getElementById("year-select").value;
+      selectedExamTime = document.getElementById("examtime-select").value;
+      selectedSubject = document.getElementById("subject-select").value;
+
+      favOnly = !!document.getElementById("fav-only").checked;
+      reviewFilter = document.getElementById("review-filter").value;
+
+      syncFilterOptions();
+
+      selectedYear = document.getElementById("year-select").value;
+      selectedExamTime = document.getElementById("examtime-select").value;
+      selectedSubject = document.getElementById("subject-select").value;
+
+      setProblemList();
+    }
+
+    function toggleWrongReview(){
+      wrongReviewMode = !wrongReviewMode;
+      const btn = document.getElementById("wrong-review-btn");
+      btn.innerText = wrongReviewMode ? "復習終了" : "×復習";
+      setProblemList();
+    }
+
+    function passProblemFilter(problem){
+      const okYear = (selectedYear === ALL_LABEL) || (problem.year === selectedYear);
+      const okExam = (selectedExamTime === ALL_LABEL) || (problem.exam_time === selectedExamTime);
+      const okSubj = (selectedSubject === ALL_LABEL) || (problem.subject === selectedSubject);
+      return okYear && okExam && okSubj;
+    }
+
+    function passChoiceExtraFilter(choice){
+      if(favOnly && !isFav(choice.choice_id)) return false;
+
+      if(reviewFilter !== "all"){
+        const cnt = getCorrectCountN(choice.choice_id);
+        if(cnt === null) return false;
+        const target = parseInt(reviewFilter.replace("c",""), 10);
+        if(cnt !== target) return false;
+      }
+      return true;
+    }
+
+    function passWrongReviewFilter(choice){
+      if(!wrongReviewMode) return true;
+      return wrongThisSession.has(String(choice.choice_id));
+    }
+
+    function hasAnyRenderableChoice({ year, exam, subject }){
+      const okProblems = problems.filter(p => {
+        const okYear = (year === ALL_LABEL) || (p.year === year);
+        const okExam = (exam === ALL_LABEL) || (p.exam_time === exam);
+        const okSubj = (subject === ALL_LABEL) || (p.subject === subject);
+        return okYear && okExam && okSubj;
+      });
+
+      if(okProblems.length === 0) return false;
+
+      const pidSet = new Set(okProblems.map(p => p.problem_id));
+
+      return choices.some(c => {
+        if(!pidSet.has(c.problem_id)) return false;
+        if(!passChoiceExtraFilter(c)) return false;
+        if(!passWrongReviewFilter(c)) return false;
+        return true;
+      });
+    }
+
+    function setProblemList(){
+      const problemListDiv = document.getElementById("problem-list");
+      const appDiv = document.getElementById("app");
+      problemListDiv.innerHTML = "";
+      appDiv.innerHTML = "";
+
+      const candidateProblemIds = new Set(
+        problems.filter(passProblemFilter).map(p => p.problem_id)
+      );
+
+      const candidateChoices = choices.filter(c => {
+        if(!candidateProblemIds.has(c.problem_id)) return false;
+        if(!passChoiceExtraFilter(c)) return false;
+        if(!passWrongReviewFilter(c)) return false;
+        return true;
+      });
+
+      const problemIdsByChoices = new Set(candidateChoices.map(c => c.problem_id));
+      const filteredProblems = problems.filter(p => candidateProblemIds.has(p.problem_id) && problemIdsByChoices.has(p.problem_id));
+
+      if(displayMode === "set"){
+        orderedProblems = (setOrder === "seq")
+          ? [...filteredProblems].sort((a,b)=>a.problem_id - b.problem_id)
+          : [...filteredProblems].sort(()=>Math.random()-0.5);
+
+        orderedProblems.forEach((p, idx)=>{
+          const btn = document.createElement("button");
+          btn.innerHTML = `
+            <div style="font-size:0.6em; line-height:1em; overflow:hidden; text-overflow:ellipsis;">${p.problem_id}</div>
+            <div style="font-size:0.6em; line-height:1em; overflow:hidden; text-overflow:ellipsis;">${p.question_summary || ""}</div>
+          `;
+          btn.onclick = ()=>{ currentProblemIndex = idx; showProblemSet(currentProblemIndex, candidateChoices); };
+          problemListDiv.appendChild(btn);
+        });
+
+        if(orderedProblems.length > 0){
+          currentProblemIndex = 0;
+          showProblemSet(currentProblemIndex, candidateChoices);
+        } else {
+          appDiv.innerHTML = wrongReviewMode
+            ? "<h3>×復習の対象がありません</h3>"
+            : "<h3>該当する問題がありません</h3>";
+        }
+      } else {
+        remainingChoices = [...candidateChoices];
+        showNextRandomChoice();
+      }
+    }
+
+    function showProblemSet(idx, candidateChoices){
+      const appDiv = document.getElementById("app");
+      appDiv.innerHTML = "";
+
+      if(idx >= orderedProblems.length){
+        appDiv.innerHTML = "<h3>全ての問題を終了しました！</h3>";
+        return;
+      }
+
+      const problem = orderedProblems[idx];
+      const probDiv = document.createElement("div");
+      probDiv.className = "problem";
+
+      const probIdDiv = document.createElement("div");
+      probIdDiv.innerHTML = `<strong>${problem.problem_id}: ${problem.question_summary || ""}</strong>`;
+      probDiv.appendChild(probIdDiv);
+
+      const currentProblemChoices = candidateChoices.filter(c => c.problem_id === problem.problem_id);
+
+      let lastExplanDiv = null;
+      currentProblemChoices.forEach(c => {
+        if(c.explanation_add && c.explanation_add.trim() !== ""){
+          const expDiv = document.createElement("div");
+          expDiv.className = "explanation-add";
+          expDiv.innerText = c.explanation_add;
+
+          if(lastExplanDiv) lastExplanDiv.after(expDiv);
+          else probIdDiv.after(expDiv);
+
+          lastExplanDiv = expDiv;
+        }
+
+        showChoiceRow(probDiv, c);
+        lastExplanDiv = probDiv.lastElementChild;
+      });
+
+      // ★「次の問題へ」左、「メニュー」右（同一行）
+      const navRow = document.createElement("div");
+      navRow.className = "nav-row";
+
+      const nextBtn = document.createElement("button");
+      nextBtn.className = "next-btn";
+      nextBtn.innerText = "次の問題へ";
+      nextBtn.onclick = ()=>{ currentProblemIndex++; showProblemSet(currentProblemIndex, candidateChoices); };
+
+      const menuBtn = document.createElement("button");
+      menuBtn.className = "menu-back-btn";
+      menuBtn.innerText = "メニュー";
+      menuBtn.onclick = backToMenu;
+
+      navRow.appendChild(nextBtn);
+      navRow.appendChild(menuBtn);
+
+      appDiv.appendChild(probDiv);
+      appDiv.appendChild(navRow);
+
+      appDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+      probDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function showNextRandomChoice(){
+      const appDiv = document.getElementById("app");
+
+      if(remainingChoices.length === 0){
+        appDiv.innerHTML = wrongReviewMode
+          ? "<h3>×復習の対象がありません</h3>"
+          : "<h3>全ての選択肢を終了しました！</h3>";
+        return;
+      }
+
+      const idx = Math.floor(Math.random() * remainingChoices.length);
+      const choice = remainingChoices.splice(idx, 1)[0];
+
+      appDiv.innerHTML = "";
+
+      const problem = problemMap.get(choice.problem_id);
+      const probDiv = document.createElement("div");
+      probDiv.className = "problem";
+
+      const probIdDiv = document.createElement("div");
+      probIdDiv.innerHTML = `<strong>${problem.problem_id}: ${problem.question_summary || ""}</strong>`;
+      probDiv.appendChild(probIdDiv);
+
+      if(choice.explanation_add && choice.explanation_add.trim() !== ""){
+        const expDiv = document.createElement("div");
+        expDiv.className = "explanation-add";
+        expDiv.innerText = choice.explanation_add;
+        probDiv.appendChild(expDiv);
+      }
+
+      showChoiceRow(probDiv, choice);
+
+      // ★「次の問題へ」左、「メニュー」右（同一行）
+      const navRow = document.createElement("div");
+      navRow.className = "nav-row";
+
+      const nextBtn = document.createElement("button");
+      nextBtn.className = "next-btn";
+      nextBtn.innerText = "次の問題へ";
+      nextBtn.onclick = showNextRandomChoice;
+
+      const menuBtn = document.createElement("button");
+      menuBtn.className = "menu-back-btn";
+      menuBtn.innerText = "メニュー";
+      menuBtn.onclick = backToMenu;
+
+      navRow.appendChild(nextBtn);
+      navRow.appendChild(menuBtn);
+
+      appDiv.appendChild(probDiv);
+      appDiv.appendChild(navRow);
+
+      appDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+      probDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function showChoiceRow(containerDiv, choice){
+      const choiceDiv = document.createElement("div");
+      choiceDiv.className = "choice";
+
+      const head = document.createElement("div");
+      head.className = "choice-head";
+
+      const textDiv = document.createElement("div");
+      textDiv.className = "choice-text";
+      textDiv.innerText = `${choice.label}: ${choice.choice_text}`;
+
+      const side = document.createElement("div");
+      side.className = "choice-side";
+
+      const hist = document.createElement("span");
+      hist.className = "hist-badge";
+      hist.id = `hist-${choice.choice_id}`;
+      hist.innerText = formatHistSymbols(choice.choice_id);
+
+      const starBtn = document.createElement("button");
+      starBtn.className = "star-btn";
+      starBtn.id = `fav-${choice.choice_id}`;
+      starBtn.innerText = isFav(choice.choice_id) ? "⭐" : "☆";
+      starBtn.onclick = ()=>{
+        const nowFav = toggleFav(choice.choice_id);
+        starBtn.innerText = nowFav ? "⭐" : "☆";
+        if(document.getElementById("fav-only").checked){
+          onFilterChange();
+        }
+      };
+
+      side.appendChild(hist);
+      side.appendChild(starBtn);
+
+      head.appendChild(textDiv);
+      head.appendChild(side);
+
+      choiceDiv.appendChild(head);
+
+      const btnDiv = document.createElement("div");
+      btnDiv.style.marginBottom = "8px";
+
+      const btnCorrect = document.createElement("button");
+      btnCorrect.className = "btn";
+      btnCorrect.innerText = "○";
+      btnCorrect.style.marginRight = "80px";
+
+      const btnIncorrect = document.createElement("button");
+      btnIncorrect.className = "btn";
+      btnIncorrect.innerText = "×";
+
+      btnCorrect.onclick = ()=>handleChoice(choice, choiceDiv, btnCorrect, btnIncorrect, true);
+      btnIncorrect.onclick = ()=>handleChoice(choice, choiceDiv, btnCorrect, btnIncorrect, false);
+
+      btnDiv.appendChild(btnCorrect);
+      btnDiv.appendChild(btnIncorrect);
+
+      choiceDiv.appendChild(btnDiv);
+      containerDiv.appendChild(choiceDiv);
+    }
+
+    function handleChoice(choice, choiceDiv, btnCorrect, btnIncorrect, selectedIsTrue){
+      if(choiceDiv.dataset.answered === "1") return;
+      choiceDiv.dataset.answered = "1";
+
+      btnCorrect.disabled = btnIncorrect.disabled = true;
+
+      if(selectedIsTrue) {
+        btnCorrect.style.backgroundColor = "#f7d358";
+        btnCorrect.style.color = "#000";
+      } else {
+        btnIncorrect.style.backgroundColor = "#f7d358";
+        btnIncorrect.style.color = "#000";
+      }
+
+      const isCorrect = (selectedIsTrue && choice.correct) || (!selectedIsTrue && !choice.correct);
+
+      pushHist(choice.choice_id, isCorrect);
+
+      const histEl = document.getElementById(`hist-${choice.choice_id}`);
+      if(histEl){
+        histEl.innerText = formatHistSymbols(choice.choice_id);
+      }
+
+      if(!isCorrect){
+        wrongThisSession.add(String(choice.choice_id));
+      }
+
+      const ex = formatExplanationHTML(choice.explanation);
+
+      const explanationDiv = document.createElement("div");
+      explanationDiv.className = "explanation";
+      explanationDiv.style.backgroundColor = isCorrect ? "#d0eaff" : "#ffd0d0";
+
+      const title = document.createElement("span");
+      title.className = "ex-title";
+      title.innerText = isCorrect ? "正解：" : "不正解：";
+      explanationDiv.appendChild(title);
+
+      if(ex.mainHTML){
+        const main = document.createElement("span");
+        main.className = "ex-main";
+        main.innerHTML = ex.mainHTML;
+        explanationDiv.appendChild(main);
+      }
+
+      ex.refHTMLs.forEach(rHTML => {
+        const ref = document.createElement("div");
+        ref.className = "ex-ref";
+        ref.innerHTML = rHTML;
+        explanationDiv.appendChild(ref);
+      });
+
+      choiceDiv.appendChild(explanationDiv);
+    }
+  </script>
+</body>
+</html>
