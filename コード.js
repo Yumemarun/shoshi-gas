@@ -1,7 +1,12 @@
 // ===== Code.gs =====
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Index')
+  return HtmlService.createTemplateFromFile('Index')
+    .evaluate()
     .setTitle('司法書士過去問肢別演習アプリ');
+}
+
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
 // スプレッドシートから問題と選択肢を取得

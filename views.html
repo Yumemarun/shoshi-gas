@@ -1,0 +1,87 @@
+  <!-- ▼ 前提：メニュー画面 ▼ -->
+  <div id="menu-screen">
+    <div class="menu-wrap">
+      <div class="menu-title">司法書士肢別演習アプリ</div>
+
+      <button id="start-exercise-btn" class="menu-btn" onclick="enterExercise()" disabled>
+        肢別演習
+      </button>
+
+      <button id="stats-btn" class="menu-btn secondary" onclick="openStats()" disabled>
+        正答状況
+      </button>
+
+      <button id="search-btn" class="menu-btn secondary" onclick="openWordSearch()" disabled>
+        ワード検索
+      </button>
+
+      <div id="menu-loading" class="menu-note">データ読み込み中…</div>
+    </div>
+  </div>
+
+  <!-- ▼ 既存：問題画面（最初は非表示） ▼ -->
+  <div id="exercise-screen" style="display:none;">
+    <div id="container">
+      <div id="menu">
+        <div id="menu-row">
+          <div>
+            <label>表示モード</label>
+            <select id="mode-select" onchange="changeMode()">
+              <option value="choice_rand" selected>肢別ランダム</option>
+              <option value="set_seq">セット番号順</option>
+              <option value="set_rand">セットランダム</option>
+            </select>
+          </div>
+
+          <div>
+            <label>年度</label>
+            <select id="year-select" onchange="onFilterChange()"></select>
+          </div>
+
+          <div>
+            <label>区分</label>
+            <select id="examtime-select" onchange="onFilterChange()"></select>
+          </div>
+
+          <div>
+            <label>科目</label>
+            <select id="subject-select" onchange="onFilterChange()"></select>
+          </div>
+
+          <div>
+            <label>復習</label>
+            <select id="review-filter" onchange="onFilterChange()">
+              <option value="all" selected>全て</option>
+              <option value="c0">○0</option>
+              <option value="c1">○1</option>
+              <option value="c2">○2</option>
+              <option value="c3">○3</option>
+              <option value="c4">○4</option>
+              <option value="c5">○5</option>
+            </select>
+          </div>
+
+          <div class="fav-wrong-block">
+            <div class="inline-check">
+              <input id="fav-only" type="checkbox" onchange="onFilterChange()">
+              <span class="small-label">★のみ</span>
+            </div>
+
+            <div>
+              <button id="wrong-review-btn" onclick="toggleWrongReview()">×復習</button>
+            </div>
+          </div>
+
+          <div style="padding-top:18px;">
+            <button id="toggle-problem-list-btn" onclick="toggleProblemList()">項目表示</button>
+          </div>
+        </div>
+
+        <div id="problem-list"></div>
+      </div>
+
+      <div id="app"></div>
+    </div>
+  </div>
+
+  
